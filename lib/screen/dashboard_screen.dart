@@ -9,7 +9,7 @@ class DashboardScreen extends StatelessWidget {
       appBar: AppBar(title: Text("Ever Blue"),backgroundColor: Colors.teal),
       body: Column(
         children: [
-          
+          // Image.asset('assets/images/splash.png'),
         ],
       )
     );

@@ -1,3 +1,6 @@
+import 'package:everblue_flutter/screen/signup_screen.dart';
+import 'package:everblue_flutter/wedget/mybutton.dart';
+import 'package:everblue_flutter/wedget/mytextfeild.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -8,6 +11,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController mail = TextEditingController();
+  final TextEditingController pass = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,11 +24,9 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
-            SizedBox(height: 50,),
-            Container(
+            SizedBox(
               height: 100,
               width: double.infinity,
-              color: Colors.red,
               child: const Center(child: Text("Log in", 
               style: TextStyle(fontSize: 50, fontWeight:FontWeight.bold, fontStyle: FontStyle.italic ),)),
             ),
@@ -31,12 +34,29 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 350,
               child: Image.asset('assets/images/profile.png'),
             ),
-            Container(
-              height: 80,
+            SizedBox(
+              height: 200,
               width: double.infinity,
-              color: Colors.blue,
-              
+              child: Column(
+                children: [
+                  MyTextformfield(labelText: "Email", hintText: 'Enter valid Email', controller: mail, errorMessage: 'Enter a vaild mail'),
+                  SizedBox(height: 15,),
+                  MyTextformfield(labelText: "Password", hintText: 'Enter valid passwrd', controller: mail, errorMessage: 'Enter a correct password'),
+                   SizedBox(height: 15,),
+                   MyButton(onPressed: (){}, text: "Log In"),
+                   ]                  
+              ),
             ),
+            GestureDetector(onTap: (){
+              Navigator.push(context
+              , MaterialPageRoute(builder: (context) => SignupScreen()));
+            },
+            child: SizedBox(
+              height: 25,
+              width: double.infinity,
+              child: const Center(child: Text("Don't have a account")),
+            ),
+            ), 
           ],
         ),
       ),
