@@ -1,3 +1,4 @@
+import 'package:everblue_flutter/screen/dashboard_screen.dart';
 import 'package:everblue_flutter/screen/signup_screen.dart';
 import 'package:everblue_flutter/wedget/mybutton.dart';
 import 'package:everblue_flutter/wedget/mytextfeild.dart';
@@ -43,19 +44,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 15,),
                   MyTextformfield(labelText: "Password", hintText: 'Enter valid passwrd', controller: mail, errorMessage: 'Enter a correct password'),
                    SizedBox(height: 15,),
-                   MyButton(onPressed: (){}, text: "Log In"),
+                   MyButton(onPressed: (){
+                    Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => DashboardScreen()));
+                   }, text: "Log In"),
                    ]                  
               ),
             ),
             GestureDetector(onTap: (){
-              Navigator.push(context
-              , MaterialPageRoute(builder: (context) => SignupScreen()));
+              Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => SignupScreen()));
             },
-            child: SizedBox(
-              height: 25,
-              width: double.infinity,
-              child: const Center(child: Text("Don't have a account")),
-            ),
+            child: const Center(child: Text("Don't have a account")),
             ), 
           ],
         ),
