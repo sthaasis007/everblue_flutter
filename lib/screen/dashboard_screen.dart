@@ -18,7 +18,6 @@ class DashboardScreen extends StatelessWidget {
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
         ],
       ),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(10),
@@ -127,39 +126,118 @@ class DashboardScreen extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),),
-                SizedBox(height: 10,),                
-                GridView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1,
-              ),
-              itemCount: 6,
-              itemBuilder: (context, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.red,  // 🔴 Box color
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Item $index",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            )
               ],
             ),
-            // Row(
-            // )
+             SizedBox(height: 20,),
+
+            Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                       height: 140,
+                        width: 170,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/splash.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ),
+                    SizedBox(width: 50,),
+                    Container(
+                       height: 140,
+                        width: 170,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/splash.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 50,),
+                Row(
+                  children: [
+                    Container(
+                       height: 140,
+                        width: 170,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/splash.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ),
+                    SizedBox(width: 50,),
+                    Container(
+                       height: 140,
+                        width: 170,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/splash.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 50,),
+                Row(
+                  children: [
+                    Container(
+                       height: 140,
+                        width: 170,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/splash.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ),
+                    SizedBox(width: 50,),
+                    Container(
+                       height: 140,
+                        width: 170,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/splash.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 50,),
+                Row(
+                  children: [
+                    Container(
+                       height: 140,
+                        width: 170,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/splash.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ),
+                    SizedBox(width: 50,),
+                    Container(
+                       height: 140,
+                        width: 170,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/splash.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 50,),
+              ],
+            )
             ],        
           ),
         ),
