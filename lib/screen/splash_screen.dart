@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // Make sure this path is correct
+import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,10 +12,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Navigate after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) return; // Prevent navigation error
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -25,15 +23,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.red,
-      body: Center(
-        child: Text(
-          'This is my Splash Screen',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 27, 74, 94),
+      body: SafeArea(
+        child: Center(
+          child: Image.asset(
+            'assets/images/splash.png',
+            width: double.infinity,
+            height: 400,
+            fit: BoxFit.contain,
           ),
         ),
       ),
