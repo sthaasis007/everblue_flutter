@@ -1,5 +1,6 @@
 
-import 'package:everblue_flutter/screen/login_screen.dart';
+// import 'package:everblue_flutter/screen/login_screen.dart';
+import 'package:everblue_flutter/screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
@@ -8,7 +9,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LoginScreen(),
+      home: SplashScreen(),
       debugShowCheckedModeBanner: false,
       );
   }
