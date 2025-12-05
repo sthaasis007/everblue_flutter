@@ -23,47 +23,49 @@ class _SignupScreenState extends State<SignupScreen> {
       style: TextStyle(fontWeight:FontWeight.bold, fontSize: 30)),
       centerTitle: true,
       backgroundColor: Colors.teal),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Container(
-              height: 100,
-              width: double.infinity,
-              child: const Center(child: Text("Sign un", 
-              style: TextStyle(fontSize: 50, fontWeight:FontWeight.bold, fontStyle: FontStyle.italic ),)),
-            ),
-            SizedBox(
-              height: 200,
-              child: Image.asset('assets/images/profile.png'),
-            ),
-            SizedBox(
-              height: 340,
-              width: double.infinity,
-              child: Column(
-                children: [
-                  MyTextformfield(labelText: "Name", hintText: 'Enter Full name', controller: name, errorMessage: 'Enter your name'),
-                  SizedBox(height: 15,),
-                  MyTextformfield(labelText: "Email", hintText: 'Enter a valid email', controller: email, errorMessage: 'Enter a valid email'),
-                   SizedBox(height: 15,),
-                  MyTextformfield(labelText: "numhber", hintText: 'Enter a phone number', controller: number, errorMessage: 'Enter a valid phone number'),
-                   SizedBox(height: 15,),
-                  MyTextformfield(labelText: "Password", hintText: '8 character long', controller: password, errorMessage: 'Enter a pasword'),
-                   SizedBox(height: 15,),
-                   MyButton(onPressed: (){
-                    Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => LoginScreen()));
-                   }, text: "Create account"),
-                   ]
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Container(
+                height: 100,
+                width: double.infinity,
+                child: const Center(child: Text("Sign un", 
+                style: TextStyle(fontSize: 50, fontWeight:FontWeight.bold, fontStyle: FontStyle.italic ),)),
               ),
-            ),
-             GestureDetector(onTap: (){
-              Navigator.pushReplacement(context
-              , MaterialPageRoute(builder: (context) => LoginScreen()));
-            },
-              child: const Center(child: Text("Already have account")),
-            ),
-          ],
+              SizedBox(
+                height: 200,
+                child: Image.asset('assets/images/profile.png'),
+              ),
+              SizedBox(
+                height: 340,
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    MyTextformfield(labelText: "Name", hintText: 'Enter Full name', controller: name, errorMessage: 'Enter your name'),
+                    SizedBox(height: 15,),
+                    MyTextformfield(labelText: "Email", hintText: 'Enter a valid email', controller: email, errorMessage: 'Enter a valid email'),
+                     SizedBox(height: 15,),
+                    MyTextformfield(labelText: "numhber", hintText: 'Enter a phone number', controller: number, errorMessage: 'Enter a valid phone number'),
+                     SizedBox(height: 15,),
+                    MyTextformfield(labelText: "Password", hintText: '8 character long', controller: password, errorMessage: 'Enter a pasword'),
+                     SizedBox(height: 15,),
+                     MyButton(onPressed: (){
+                      Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => LoginScreen()));
+                     }, text: "Create account"),
+                     ]
+                ),
+              ),
+               GestureDetector(onTap: (){
+                Navigator.pushReplacement(context
+                , MaterialPageRoute(builder: (context) => LoginScreen()));
+              },
+                child: const Center(child: Text("Already have account")),
+              ),
+            ],
+          ),
         ),
       ),
       );

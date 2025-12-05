@@ -1,10 +1,10 @@
-import 'package:everblue_flutter/screen/cart_screen.dart';
-import 'package:everblue_flutter/screen/checkout_screen.dart';
-import 'package:everblue_flutter/screen/profile_screen.dart';
+import 'package:everblue_flutter/screen/dashboard_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:everblue_flutter/screen/cart_screen.dart';
+import 'package:everblue_flutter/screen/profile_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+class CheckoutScreen extends StatelessWidget {
+  const CheckoutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
       body: Center(
-        child: Text("This is dashboard", style: TextStyle(
+        child: Text("This is Checkout area", style: TextStyle(
           fontSize: 40
         ),),
       ),
