@@ -28,7 +28,7 @@ class _SignupScreenState extends State<SignupScreen> {
           padding: const EdgeInsets.all(10),
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 height: 100,
                 width: double.infinity,
                 child: const Center(child: Text("Sign up", 
