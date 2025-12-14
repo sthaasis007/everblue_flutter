@@ -3,53 +3,49 @@ import 'package:everblue_flutter/screen/bottom_screen/checkout_screen.dart';
 import 'package:everblue_flutter/screen/bottom_screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectIndex = 0;
+
+  List<Widget> lstButtomScreen = [
+    const DashboardScreen(),
+    const CartScreen(),
+    const CheckoutScreen(),
+    const ProfileScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Ever Blue"),backgroundColor: Colors.teal),
-      
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-          IconButton(
-            icon: Icon(Icons.home,  color: Colors.teal),
-            onPressed: () {Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => DashboardScreen()));},
-          ),
-          IconButton(
-            icon: Icon(Icons.shopping_cart,  color: Colors.teal),
-            onPressed: () {
-              Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => CartScreen()));
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.payment,  color: Colors.teal),
-            onPressed: () {
-              Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => CheckoutScreen()));
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.person,  color: Colors.teal),
-            onPressed: () {
-              Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => ProfileScreen()));
-            },
-          ),
-          ],
+      body: lstButtomScreen[_selectIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home'
+            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart'
+            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.payment),
+            label: 'Check Out'
+            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile'
+            ),
+        ]
         ),
-      ),
-      body: Center(
-        child: Text("This is dashboard", style: TextStyle(
-          fontSize: 40
-        ),),
-      ),
     );
   }
 }
