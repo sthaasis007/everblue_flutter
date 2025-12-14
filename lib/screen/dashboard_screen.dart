@@ -1,6 +1,6 @@
-import 'package:everblue_flutter/screen/cart_screen.dart';
-import 'package:everblue_flutter/screen/checkout_screen.dart';
-import 'package:everblue_flutter/screen/profile_screen.dart';
+import 'package:everblue_flutter/screen/bottom_screen/cart_screen.dart';
+import 'package:everblue_flutter/screen/bottom_screen/checkout_screen.dart';
+import 'package:everblue_flutter/screen/bottom_screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class DashboardScreen extends StatelessWidget {
