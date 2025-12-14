@@ -1,5 +1,6 @@
 import 'package:everblue_flutter/screen/bottom_screen/cart_screen.dart';
 import 'package:everblue_flutter/screen/bottom_screen/checkout_screen.dart';
+import 'package:everblue_flutter/screen/bottom_screen/home_screen.dart';
 import 'package:everblue_flutter/screen/bottom_screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +15,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _selectIndex = 0;
 
   List<Widget> lstButtomScreen = [
-    const DashboardScreen(),
+    const HomeScreen(),
     const CartScreen(),
     const CheckoutScreen(),
     const ProfileScreen(),
@@ -44,7 +45,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: Icon(Icons.person),
             label: 'Profile'
             ),
-        ]
+        ],
+        backgroundColor: Colors.teal,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.white,
+        currentIndex: _selectIndex,
+        onTap: (index){
+          setState(() {
+            _selectIndex = index;
+          });
+        },
         ),
     );
   }

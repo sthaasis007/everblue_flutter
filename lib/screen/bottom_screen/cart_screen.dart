@@ -1,54 +1,18 @@
-import 'package:everblue_flutter/screen/dashboard_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:everblue_flutter/screen/bottom_screen/checkout_screen.dart';
-import 'package:everblue_flutter/screen/bottom_screen/profile_screen.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
   @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Ever Blue"),backgroundColor: Colors.teal),
-      
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-          IconButton(
-            icon: Icon(Icons.home,  color: Colors.teal),
-            onPressed: () {Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => DashboardScreen()));},
-          ),
-          IconButton(
-            icon: Icon(Icons.shopping_cart,  color: Colors.teal),
-            onPressed: () {
-              Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => CartScreen()));
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.payment,  color: Colors.teal),
-            onPressed: () {
-              Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => CheckoutScreen()));
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.person,  color: Colors.teal),
-            onPressed: () {
-              Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => ProfileScreen()));
-            },
-          ),
-          ],
-        ),
-      ),
-      body: Center(
-        child: Text("This is cart", style: TextStyle(
-          fontSize: 40
-        ),),
+    return SizedBox.expand(
+      child: Center(
+        child: Text("welcome to cart screen"),
       ),
     );
   }

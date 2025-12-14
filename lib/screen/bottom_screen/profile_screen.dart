@@ -1,20 +1,18 @@
-import 'package:everblue_flutter/screen/dashboard_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:everblue_flutter/screen/bottom_screen/cart_screen.dart';
-import 'package:everblue_flutter/screen/bottom_screen/checkout_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileSccreenState();
+}
+
+class _ProfileSccreenState extends State<ProfileScreen> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Ever Blue"),backgroundColor: Colors.teal),
-      
-      body: Center(
-        child: Text("This is Profile section", style: TextStyle(
-          fontSize: 40
-        ),),
+    return SizedBox.expand(
+      child: Center(
+        child: Text("welcome to profile screen"),
       ),
     );
   }
