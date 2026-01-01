@@ -1,8 +1,10 @@
-import 'package:everblue_flutter/screen/bottom_screen/cart_screen.dart';
-import 'package:everblue_flutter/screen/bottom_screen/checkout_screen.dart';
-import 'package:everblue_flutter/screen/bottom_screen/home_screen.dart';
-import 'package:everblue_flutter/screen/bottom_screen/profile_screen.dart';
+
 import 'package:flutter/material.dart';
+
+import 'bottom_screen/cart_screen.dart';
+import 'bottom_screen/checkout_screen.dart';
+import 'bottom_screen/home_screen.dart';
+import 'bottom_screen/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
