@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../core/widgets/mybutton.dart';
-import '../core/widgets/mytextfeild.dart';
+import '../../../../core/widgets/mybutton.dart';
+import '../../../../core/widgets/mytextfeild.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
