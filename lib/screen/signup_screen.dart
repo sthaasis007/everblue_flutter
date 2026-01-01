@@ -1,7 +1,9 @@
-import 'package:everblue_flutter/screen/login_screen.dart';
-import 'package:everblue_flutter/wedget/mybutton.dart';
-import 'package:everblue_flutter/wedget/mytextfeild.dart';
+
 import 'package:flutter/material.dart';
+
+import '../wedget/mybutton.dart';
+import '../wedget/mytextfeild.dart';
+import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});

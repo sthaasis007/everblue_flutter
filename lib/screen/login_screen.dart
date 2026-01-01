@@ -1,8 +1,10 @@
-import 'package:everblue_flutter/screen/dashboard_screen.dart';
-import 'package:everblue_flutter/screen/signup_screen.dart';
-import 'package:everblue_flutter/wedget/mybutton.dart';
-import 'package:everblue_flutter/wedget/mytextfeild.dart';
+
 import 'package:flutter/material.dart';
+
+import '../wedget/mybutton.dart';
+import '../wedget/mytextfeild.dart';
+import 'dashboard_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 100,
                 width: double.infinity,
                 child: const Center(child: Text("Log in", 
-                style: TextStyle(fontSize: 50, fontWeight:FontWeight.bold, fontStyle: FontStyle.italic ),)),
+                style: TextStyle(fontSize: 50, fontFamily: 'Montserrat Bold Italic' ),)),
               ),
               SizedBox(
                 height: 350,
