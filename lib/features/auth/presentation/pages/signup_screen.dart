@@ -49,7 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     SizedBox(height: 15,),
                     MyTextformfield(labelText: "Email", hintText: 'Enter a valid email', controller: email, errorMessage: 'Enter a valid email'),
                      SizedBox(height: 15,),
-                    MyTextformfield(labelText: "numhber", hintText: 'Enter a phone number', controller: number, errorMessage: 'Enter a valid phone number'),
+                    MyTextformfield(labelText: "number", hintText: 'Enter a phone number', controller: number, errorMessage: 'Enter a valid phone number'),
                      SizedBox(height: 15,),
                     MyTextformfield(labelText: "Password", hintText: '8 character long', controller: password, errorMessage: 'Enter a pasword'),
                      SizedBox(height: 15,),
