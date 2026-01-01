@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../wedget/mybutton.dart';
-import '../wedget/mytextfeild.dart';
-import 'dashboard_screen.dart';
+import '../core/widgets/mybutton.dart';
+import '../core/widgets/mytextfeild.dart';
+import '../features/dashboard/dashboard_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
