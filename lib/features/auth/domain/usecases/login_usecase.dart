@@ -7,11 +7,11 @@ import 'package:lost_n_found/features/auth/data/repositories/auth_repository.dar
 import 'package:lost_n_found/features/auth/domain/entities/auth_entity.dart';
 import 'package:lost_n_found/features/auth/domain/repositories/auth_repositories.dart';
 
-class LoginUsecaseParams extends Equatable {
+class LoginParams extends Equatable {
 
   final String email;
   final String password;
-  const LoginUsecaseParams({
+  const LoginParams({
     required this.email,
     required this.password,
   });
@@ -26,13 +26,13 @@ final loginUsecaseProvider = Provider<LoginUsecase>((ref) {
 });
     
 
-class LoginUsecase implements UsecaseWithParms<AuthEntity, LoginUsecaseParams> {
+class LoginUsecase implements UsecaseWithParms<AuthEntity, LoginParams> {
  
   final IAuthRepository _authRepository;
   LoginUsecase({required IAuthRepository authRepository})
     : _authRepository = authRepository;
   @override
-  Future<Either<Failure, AuthEntity>> call(LoginUsecaseParams params) {
+  Future<Either<Failure, AuthEntity>> call(LoginParams params) {
     return _authRepository.login(params.email, params.password);
   }
 

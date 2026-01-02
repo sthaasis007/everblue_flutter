@@ -22,7 +22,7 @@ class AuthRepository implements IAuthRepository{
   Future<Either<Failure, AuthEntity>> getCurrentUser() async {
     try{
       final user = await _authDatasource.getCurrentUser();
-      if (user !=null){
+      if (user != null){
         final entity = user.toEntity();
         return Right(entity);
       }
@@ -37,7 +37,7 @@ class AuthRepository implements IAuthRepository{
   Future<Either<Failure, AuthEntity>> login(String email, String password) async{
     try{
       final user = await _authDatasource.login(email, password);
-      if (user !=null){
+      if (user != null){
         final entity = user.toEntity();
         return Right(entity);
       }

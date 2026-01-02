@@ -7,7 +7,7 @@ class MyButton extends StatelessWidget {
     required this.text,
     });
 
-    final VoidCallback onPressed;
+    final VoidCallback? onPressed;
     final String text;
 
   @override
@@ -16,7 +16,7 @@ class MyButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blueAccent,
+          backgroundColor: onPressed == null ? Colors.grey : Colors.blueAccent,
           padding: const EdgeInsets.symmetric(
             horizontal: 20,
             vertical: 10
