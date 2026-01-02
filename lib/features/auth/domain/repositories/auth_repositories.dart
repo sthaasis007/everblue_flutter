@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:lost_n_found/core/error/failures.dart';
-import 'package:lost_n_found/features/auth/domain/entities/auth_entity.dart';
+import 'package:everblue/core/error/failures.dart';
+import 'package:everblue/features/auth/domain/entities/auth_entity.dart';
 
 abstract interface class IAuthRepository {
   Future<Either<Failure, bool>> register(AuthEntity entity);

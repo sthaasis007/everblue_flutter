@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:everblue/core/error/failures.dart';
+import 'package:everblue/features/auth/data/datasources/auth_datasource.dart';
+import 'package:everblue/features/auth/data/datasources/local/auth_local_datasource.dart';
+import 'package:everblue/features/auth/data/models/auth_hive_model.dart';
+import 'package:everblue/features/auth/domain/entities/auth_entity.dart';
+import 'package:everblue/features/auth/domain/repositories/auth_repositories.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lost_n_found/core/error/failures.dart';
-import 'package:lost_n_found/features/auth/data/datasources/auth_datasource.dart';
-import 'package:lost_n_found/features/auth/data/datasources/local/auth_local_datasource.dart';
-import 'package:lost_n_found/features/auth/data/models/auth_hive_model.dart';
-import 'package:lost_n_found/features/auth/domain/entities/auth_entity.dart';
-import 'package:lost_n_found/features/auth/domain/repositories/auth_repositories.dart';
 
 //provider
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {

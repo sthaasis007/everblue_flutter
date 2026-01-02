@@ -1,9 +1,9 @@
+import 'package:everblue/features/auth/domain/usecases/get_current_usecase.dart';
+import 'package:everblue/features/auth/domain/usecases/login_usecase.dart';
+import 'package:everblue/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:everblue/features/auth/domain/usecases/register_usecase.dart';
+import 'package:everblue/features/auth/presentation/state/auth_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lost_n_found/features/auth/domain/usecases/get_current_usecase.dart';
-import 'package:lost_n_found/features/auth/domain/usecases/login_usecase.dart';
-import 'package:lost_n_found/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:lost_n_found/features/auth/domain/usecases/register_usecase.dart';
-import 'package:lost_n_found/features/auth/presentation/state/auth_state.dart';
 
 final authViewModelProvider = NotifierProvider<AuthViewModel, AuthState>(
   AuthViewModel.new,
@@ -46,7 +46,7 @@ class AuthViewModel extends Notifier<AuthState> {
     result.fold(
       (failure) => state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: failure.message,
+        errorMessage: failure?.message,
       ),
       (success) => state = state.copyWith(status: AuthStatus.registered),
     );

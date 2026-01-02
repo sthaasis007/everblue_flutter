@@ -1,4 +1,4 @@
-import 'package:lost_n_found/features/auth/data/models/auth_hive_model.dart';
+import 'package:everblue/features/auth/data/models/auth_hive_model.dart';
 
 abstract interface class IAuthDatasource {
   Future<bool> register(AuthHiveModel model);

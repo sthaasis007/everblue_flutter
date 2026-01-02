@@ -1,7 +1,7 @@
+import 'package:everblue/core/services/hive/hive_service.dart';
+import 'package:everblue/features/auth/data/datasources/auth_datasource.dart';
+import 'package:everblue/features/auth/data/models/auth_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lost_n_found/core/services/hive/hive_service.dart';
-import 'package:lost_n_found/features/auth/data/datasources/auth_datasource.dart';
-import 'package:lost_n_found/features/auth/data/models/auth_hive_model.dart';
 
 final authLocalDatasourceProvider = Provider<AuthLocalDatasource>((ref) {
   final hiveService = ref.watch(hiveServiceProvider);

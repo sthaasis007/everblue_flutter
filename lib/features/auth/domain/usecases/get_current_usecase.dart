@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
+import 'package:everblue/core/error/failures.dart';
+import 'package:everblue/core/usecases/app_usecase.dart';
+import 'package:everblue/features/auth/data/repositories/auth_repository.dart';
+import 'package:everblue/features/auth/domain/entities/auth_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lost_n_found/core/error/failures.dart';
-import 'package:lost_n_found/core/usecases/app_usecase.dart';
-import 'package:lost_n_found/features/auth/data/repositories/auth_repository.dart';
-import 'package:lost_n_found/features/auth/domain/entities/auth_entity.dart';
 
 import '../repositories/auth_repositories.dart';
 
