@@ -5,7 +5,11 @@ import 'package:lost_n_found/core/constants/hive_table_constants.dart';
 import 'package:lost_n_found/features/auth/data/models/auth_hive_model.dart';
 
 final hiveServiceProvider = Provider<HiveService>((ref) {
-  return HiveService();
+  final service = HiveService();
+  // trigger initialization (don't await here) so consumers can use the service
+  service.init();
+  service.openboxes();
+  return service;
 });
 
 class HiveService {
@@ -25,7 +29,9 @@ class HiveService {
   }
 
   Future<void> openboxes() async {
-    await Hive.openBox<AuthHiveModel>(HiveTableConstants.authTable);
+    if (!Hive.isBoxOpen(HiveTableConstants.authTable)) {
+      await Hive.openBox<AuthHiveModel>(HiveTableConstants.authTable);
+    }
   }
   
   Future<void> close() async {
@@ -36,8 +42,20 @@ class HiveService {
     Hive.box<AuthHiveModel>(HiveTableConstants.authTable);
 
   Future<AuthHiveModel> registerUser(AuthHiveModel model) async {
-    await _authBox.put(model.authId, model);
-    return model;
+    try {
+      if (!Hive.isBoxOpen(HiveTableConstants.authTable)) {
+        await Hive.openBox<AuthHiveModel>(HiveTableConstants.authTable);
+      }
+      final key = model.authId;
+      if (key == null) throw Exception('Auth id is null');
+      await _authBox.put(key, model);
+      return model;
+    } catch (e, st) {
+      // helpful debug information during development
+      // ignore: avoid_print
+      print('HiveService.registerUser error: $e\n$st');
+      rethrow;
+    }
     }
 
     //Login
