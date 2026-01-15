@@ -41,7 +41,7 @@ class HiveService {
   Box<AuthHiveModel> get _authBox =>
     Hive.box<AuthHiveModel>(HiveTableConstants.authTable);
 
-  Future<AuthHiveModel> registerUser(AuthHiveModel model) async {
+  Future<AuthHiveModel> register(AuthHiveModel model) async {
     try {
       if (!Hive.isBoxOpen(HiveTableConstants.authTable)) {
         await Hive.openBox<AuthHiveModel>(HiveTableConstants.authTable);
@@ -69,6 +69,10 @@ class HiveService {
     return null;
   }  
 
+    AuthHiveModel? getUserById(String authId) {
+    return _authBox.get(authId);
+  }
+
   //logout
   Future<void> logoutUser() async {
     
@@ -80,10 +84,11 @@ class HiveService {
   }
 
   //check email existence
-  bool isEmailExists(String email) {
-    final users = _authBox.values.where(
-      (user) => user.email == email,
-    );
-    return users.isNotEmpty;
+  AuthHiveModel? getUserByEmail(String email) {
+    try {
+      return _authBox.values.firstWhere((user) => user.email == email);
+    } catch (e) {
+      return null;
+    }
   }
 }

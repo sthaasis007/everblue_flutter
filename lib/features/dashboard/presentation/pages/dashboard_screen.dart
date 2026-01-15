@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-
 import '../../../bottom_screen/presentation/pages/cart_screen.dart';
 import '../../../bottom_screen/presentation/pages/checkout_screen.dart';
 import '../../../bottom_screen/presentation/pages/home_screen.dart';
