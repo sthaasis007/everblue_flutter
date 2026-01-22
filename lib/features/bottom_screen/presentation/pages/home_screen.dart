@@ -11,14 +11,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
           children: [
             SizedBox(
-              height: 250,
+              height: 150,
               child: Image.asset('assets/images/dashpic.png')),
-        
             Align(
               alignment: Alignment.topLeft,
               child: Text("Top Seller",
@@ -56,8 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontFamily: 'OpenSans Regular',
               ),),
             ),     
-            Expanded(
+            SizedBox(
               child: GridView.count(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(10),
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
@@ -73,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+      )
     );
   }
 }
