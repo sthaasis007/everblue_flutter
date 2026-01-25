@@ -1,6 +1,7 @@
 import 'package:everblue/core/services/storage/user_session_service.dart';
 import 'package:everblue/features/auth/presentation/pages/login_screen.dart';
 import 'package:everblue/features/auth/presentation/view_model/auth_view_model.dart';
+import 'package:everblue/features/profilefeature_screen/presentation/pages/edit_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,6 +33,8 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                     bottomRight: Radius.circular(32),
                   ),
                 ),
+
+                // Profile Info
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
@@ -76,6 +79,7 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(height: 16),
 
+                    // User Name and Email
                     Text(
                       userName,
                       style: TextStyle(
@@ -105,7 +109,9 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                     _MenuItem(
                       icon: Icons.person_outline_rounded,
                       title: 'Edit Profile',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfile()));
+                      },
                     ),
                     const SizedBox(height: 12),
                     _MenuItem(

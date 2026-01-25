@@ -21,7 +21,7 @@ class UserSessionService {
   static const String _keyIsLoggedIn = 'is_logged_in';
   static const String _keyUserId = 'user_id';
   static const String _keyUserEmail = 'user_email';
-  static const String _keyUserFullName = 'user_full_name';
+  static const String _keyUserFullName = 'name';
   static const String _keyUserPhoneNumber = 'user_phone_number';
   static const String _keyToken = 'auth_token';
 
