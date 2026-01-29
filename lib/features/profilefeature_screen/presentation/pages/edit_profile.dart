@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:everblue/core/api/api_endpoint.dart';
 import 'package:everblue/core/services/storage/user_session_service.dart';
+import 'package:everblue/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:everblue/features/profilefeature_screen/presentation/widgets/media_picker_buttom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -15,23 +17,18 @@ class EditProfile extends ConsumerStatefulWidget {
 }
 
 class _EditProfileState extends ConsumerState<EditProfile> {
+
+  final List<File> _selectedMedia = [];
+  final ImagePicker _imagePicker = ImagePicker();
+
   @override
-  Widget build(BuildContext context) {
-    final userSessionService = ref.watch(userSessionServiceProvider);
-
-    final userName =
-        userSessionService.getCurrentUserFullName() ?? 'User';
-    final userEmail =
-        userSessionService.getCurrentUserEmail() ?? '';
-    final phoneNumber =
-        userSessionService.getCurrentUserPhoneNumber() ?? '';
-    // final profileImageUrl =
-    //     userSessionService.getCurrentUserProfileImage();
-
-    final List<File> _selectedMedia = [];
-    final ImagePicker _imagePicker = ImagePicker();
-    String? _selectedMediaType;
-    
+  void initState() {
+    super.initState();
+    // Refresh session data when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(userSessionServiceProvider);
+    });
+  }
 
   void _showPermissionDeniedDialog() {
     showDialog(
@@ -75,10 +72,6 @@ class _EditProfileState extends ConsumerState<EditProfile> {
     return false;
   }
 
-  
-
-  
-
   Future<void> _pickFromCamera() async {
     final hasPermission = await _requestPermission(Permission.camera);
     if (!hasPermission) return;
@@ -92,11 +85,22 @@ class _EditProfileState extends ConsumerState<EditProfile> {
       setState(() {
         _selectedMedia.clear();
         _selectedMedia.add(File(photo.path));
-        _selectedMediaType = 'photo';
       });
-      // await ref
-          // .read(itemViewModelProvider.notifier)
-          // .uploadPhoto(File(photo.path));
+      final result = await ref
+          .read(authViewModelProvider.notifier)
+          .uploadPhoto(File(photo.path));
+      
+      // If upload successful, rebuild widget to fetch updated profile image from session
+      if (result != null && mounted) {
+        // print('🎥 Camera upload successful: $result');
+        // Wait a moment to ensure SharedPreferences is updated
+        await Future.delayed(const Duration(milliseconds: 500));
+        setState(() {
+          _selectedMedia.clear();
+        });
+        // Force rebuild the parent to fetch updated profileImageUrl
+        ref.invalidate(userSessionServiceProvider);
+      }
     }
   }
 
@@ -111,19 +115,29 @@ class _EditProfileState extends ConsumerState<EditProfile> {
         setState(() {
           _selectedMedia.clear();
           _selectedMedia.add(File(image.path));
-          _selectedMediaType = 'photo';
         });
-        // await ref
-        //     .read(itemViewModelProvider.notifier)
-        //     .uploadPhoto(File(image.path));
+        final result = await ref
+            .read(authViewModelProvider.notifier)
+            .uploadPhoto(File(image.path));
+        
+        // If upload successful, rebuild widget to fetch updated profile image from session
+        if (result != null && mounted) {
+          // print('🖼️ Gallery upload successful: $result');
+          // Wait a moment to ensure SharedPreferences is updated
+          await Future.delayed(const Duration(milliseconds: 500));
+          setState(() {
+            _selectedMedia.clear();
+          });
+          // Force rebuild the parent to fetch updated profileImageUrl
+          ref.invalidate(userSessionServiceProvider);
+        }
       }
     } catch (e) {
       debugPrint('Gallery Error $e');
       if (mounted) {
-        // SnackbarUtils.showError(
-          // context,
-          // 'Unable to access gallery. Please try using the camera instead.',
-        // );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unable to access gallery. Please try using the camera instead.')),
+        );
       }
     }
   }
@@ -134,7 +148,34 @@ class _EditProfileState extends ConsumerState<EditProfile> {
       onCameraTap: _pickFromCamera,
       onGalleryTap: _pickFromGallery,
     );
-  }  
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userSessionService = ref.watch(userSessionServiceProvider);
+
+    final userName =
+        userSessionService.getCurrentUserFullName() ?? 'User';
+    final userEmail =
+        userSessionService.getCurrentUserEmail() ?? '';
+    final phoneNumber =
+        userSessionService.getCurrentUserPhoneNumber() ?? '';
+    final profileImageUrl =
+        userSessionService.getCurrentUserProfilePicture() ?? '';
+    
+    String? _buildProfileImageUrl(String path) {
+      if (path.isEmpty || path == 'default.png') return null;
+      if (path.startsWith('http')) return path;
+      if (path.startsWith('/public')) {
+        return '${ApiEndpoints.serverUrl}${path.replaceFirst('/public', '')}';
+      }
+      if (path.startsWith('/profile_picture')) return '${ApiEndpoints.serverUrl}$path';
+      return '${ApiEndpoints.serverUrl}/profile_picture/$path';
+    }
+
+    final profileImageFullUrl = _buildProfileImageUrl(profileImageUrl);
+    
+    // print('📝 EditProfile build - Photo URL: $profileImageUrl');
 
     return Scaffold(
       appBar: AppBar(
@@ -171,39 +212,34 @@ class _EditProfileState extends ConsumerState<EditProfile> {
                         ),
                       ],
                     ),
-                    child: CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                          style: TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      
-                      // radius: 60,
-                      // backgroundColor: Colors.grey.shade200,
-                      // backgroundImage:
-                      //     profileImageUrl != null &&
-                      //             profileImageUrl.isNotEmpty
-                      //         ? NetworkImage(profileImageUrl)
-                      //         : null,
-                      // child: profileImageUrl == null ||
-                      //         profileImageUrl.isEmpty
-                      //     ? Text(
-                      //         userName.isNotEmpty
-                      //             ? userName[0].toUpperCase()
-                      //             : 'U',
-                      //         style: const TextStyle(
-                      //           fontSize: 48,
-                      //           fontWeight: FontWeight.bold,
-                      //           color: Colors.teal,
-                      //         ),
-                      //       )
-                      //     : null,
-                    ),
+                    child: _selectedMedia.isNotEmpty
+                        ? CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Colors.white,
+                            backgroundImage: FileImage(_selectedMedia.first),
+                          )
+                        : (profileImageFullUrl != null)
+                            ? CircleAvatar(
+                                radius: 60,
+                                backgroundColor: Colors.white,
+                                backgroundImage: NetworkImage(
+                                  profileImageFullUrl,
+                                ),
+                                child: Container(),
+                              )
+                            : CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.white,
+                              child: Text(
+                                userName.isNotEmpty
+                                    ? userName[0].toUpperCase()
+                                    : 'U',
+                                style: const TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.lightBlue,
+                                ),)
+                              ),
                   ),
                   Positioned(
                     bottom: 0,
@@ -289,15 +325,6 @@ class _EditProfileState extends ConsumerState<EditProfile> {
         ),
       ),
     );
-  }
-
-  // Upload image handler (camera + button use same logic)
-  Future<void> _uploadProfileImage() async {
-    // TODO:
-    // 1. Pick image (ImagePicker)
-    // 2. Upload via multipart
-    // 3. Update user session
-    // 4. ref.invalidate(userSessionServiceProvider)
   }
 
   Widget _profileField({

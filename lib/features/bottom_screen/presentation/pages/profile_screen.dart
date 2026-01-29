@@ -1,3 +1,4 @@
+import 'package:everblue/core/api/api_endpoint.dart';
 import 'package:everblue/core/services/storage/user_session_service.dart';
 import 'package:everblue/features/auth/presentation/pages/login_screen.dart';
 import 'package:everblue/features/auth/presentation/view_model/auth_view_model.dart';
@@ -14,10 +15,35 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
   @override
+  void initState() {
+    super.initState();
+    // Refresh session data when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // print('👤 ProfileScreen: Refreshing session data...');
+      ref.invalidate(userSessionServiceProvider);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final userSessionService = ref.watch(userSessionServiceProvider);
     final userName = userSessionService.getCurrentUserFullName() ?? 'User';
     final userEmail = userSessionService.getCurrentUserEmail() ?? '';
+    final userPhotoUrl = userSessionService.getCurrentUserProfilePicture() ?? '';
+
+    String? _buildProfileImageUrl(String path) {
+      if (path.isEmpty || path == 'default.png') return null;
+      if (path.startsWith('http')) return path;
+      if (path.startsWith('/public')) {
+        return '${ApiEndpoints.serverUrl}${path.replaceFirst('/public', '')}';
+      }
+      if (path.startsWith('/profile_picture')) return '${ApiEndpoints.serverUrl}$path';
+      return '${ApiEndpoints.serverUrl}/profile_picture/$path';
+    }
+
+    final displayPhotoUrl = _buildProfileImageUrl(userPhotoUrl);
+    
+    // print('🔍 ProfileScreen build - Photo URL: $userPhotoUrl');
 
     return Scaffold(
       body: SafeArea(
@@ -64,18 +90,27 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ],
                       ),
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                          style: TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
+                      child: (displayPhotoUrl != null)
+                          ? CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.white,
+                              backgroundImage: NetworkImage(
+                                displayPhotoUrl,
+                              ),
+                              child: Container(),
+                            )
+                          : CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.white,
+                              child: Text(
+                                userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                style: TextStyle(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
                     ),
                     const SizedBox(height: 16),
 

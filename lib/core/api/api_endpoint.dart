@@ -33,4 +33,5 @@ class ApiEndpoints {
   static const String customerLogin = '/customers/login';
   static const String customerRegister = '/customers/signup';
   static const String customerProfile = '/customers/upload-image';
+
 }
