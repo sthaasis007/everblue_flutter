@@ -9,10 +9,12 @@ import 'app/app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final hiveService = HiveService();
-  await hiveService.init();
-  await hiveService.openboxes();
+  // final hiveService = HiveService();
+  // await hiveService.init();
+  // await hiveService.openboxes();
 
+  await HiveService().init();
+  
   final sharedPreferences = await SharedPreferences.getInstance();
 
   runApp(

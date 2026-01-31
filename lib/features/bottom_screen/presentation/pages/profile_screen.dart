@@ -1,6 +1,8 @@
+import 'package:everblue/core/api/api_endpoint.dart';
 import 'package:everblue/core/services/storage/user_session_service.dart';
 import 'package:everblue/features/auth/presentation/pages/login_screen.dart';
 import 'package:everblue/features/auth/presentation/view_model/auth_view_model.dart';
+import 'package:everblue/features/profilefeature_screen/presentation/pages/edit_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,10 +15,35 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
   @override
+  void initState() {
+    super.initState();
+    // Refresh session data when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // print('👤 ProfileScreen: Refreshing session data...');
+      ref.invalidate(userSessionServiceProvider);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final userSessionService = ref.watch(userSessionServiceProvider);
     final userName = userSessionService.getCurrentUserFullName() ?? 'User';
     final userEmail = userSessionService.getCurrentUserEmail() ?? '';
+    final userPhotoUrl = userSessionService.getCurrentUserProfilePicture() ?? '';
+
+    String? _buildProfileImageUrl(String path) {
+      if (path.isEmpty || path == 'default.png') return null;
+      if (path.startsWith('http')) return path;
+      if (path.startsWith('/public')) {
+        return '${ApiEndpoints.serverUrl}${path.replaceFirst('/public', '')}';
+      }
+      if (path.startsWith('/profile_picture')) return '${ApiEndpoints.serverUrl}$path';
+      return '${ApiEndpoints.serverUrl}/profile_picture/$path';
+    }
+
+    final displayPhotoUrl = _buildProfileImageUrl(userPhotoUrl);
+    
+    // print('🔍 ProfileScreen build - Photo URL: $userPhotoUrl');
 
     return Scaffold(
       body: SafeArea(
@@ -32,6 +59,8 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                     bottomRight: Radius.circular(32),
                   ),
                 ),
+
+                // Profile Info
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
@@ -61,21 +90,31 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ],
                       ),
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                          style: TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
+                      child: (displayPhotoUrl != null)
+                          ? CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.white,
+                              backgroundImage: NetworkImage(
+                                displayPhotoUrl,
+                              ),
+                              child: Container(),
+                            )
+                          : CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.white,
+                              child: Text(
+                                userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                style: TextStyle(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
                     ),
                     const SizedBox(height: 16),
 
+                    // User Name and Email
                     Text(
                       userName,
                       style: TextStyle(
@@ -105,7 +144,9 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                     _MenuItem(
                       icon: Icons.person_outline_rounded,
                       title: 'Edit Profile',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfile()));
+                      },
                     ),
                     const SizedBox(height: 12),
                     _MenuItem(

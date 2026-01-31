@@ -4,21 +4,21 @@ import 'package:everblue/features/auth/data/datasources/auth_datasource.dart';
 import 'package:everblue/features/auth/data/models/auth_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final authLocalDatasourceProvider = Provider<AuthLocalDataSource>((ref) {
+// Create provider
+final authLocalDatasourceProvider = Provider<AuthLocalDatasource>((ref) {
   final hiveService = ref.read(hiveServiceProvider);
   final userSessionService = ref.read(userSessionServiceProvider);
-  return AuthLocalDataSource(
+  return AuthLocalDatasource(
     hiveService: hiveService,
     userSessionService: userSessionService,
   );
 });
 
-class AuthLocalDataSource implements IAuthLocalDataSource{
-
+class AuthLocalDatasource implements IAuthLocalDataSource {
   final HiveService _hiveService;
   final UserSessionService _userSessionService;
 
-  AuthLocalDataSource({
+  AuthLocalDatasource({
     required HiveService hiveService,
     required UserSessionService userSessionService,
   }) : _hiveService = hiveService,
@@ -28,7 +28,27 @@ class AuthLocalDataSource implements IAuthLocalDataSource{
   Future<AuthHiveModel> register(AuthHiveModel user) async {
     return await _hiveService.register(user);
   }
-      
+
+  @override
+  Future<AuthHiveModel?> login(String email, String password) async {
+    try {
+      final user = _hiveService.login(email, password);
+      if (user != null && user.authId != null) {
+        // Save user session to SharedPreferences : Pachi app restart vayo vani pani user logged in rahos
+        await _userSessionService.saveUserSession(
+          userId: user.authId!,
+          email: user.email,
+          fullName: user.fullName,
+          phoneNumber: user.phoneNumber,
+          profilePicture: user.profilePicture,
+        );
+      }
+      return user;
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Future<AuthHiveModel?> getCurrentUser() async {
     try {
@@ -50,42 +70,50 @@ class AuthLocalDataSource implements IAuthLocalDataSource{
     }
   }
 
-
-  @override
-  Future<AuthHiveModel?> login(String email, String password) async {
-    try {
-      final user = await _hiveService.loginUser(email, password);
-      if (user != null && user.authId != null) {
-        // Save user session to SharedPreferences : Pachi app restart vayo vani pani user logged in rahos
-        await _userSessionService.saveUserSession(
-          userId: user.authId!,
-          email: user.email,
-          fullName: user.fullName,
-          phoneNumber: user.phoneNumber,
-        );
-      }
-      return user;
-      } catch (e) {
-      return null;
-    } 
-  }
-
   @override
   Future<bool> logout() async {
     try {
-      await _hiveService.logoutUser();
-      return Future.value(true);
+      await _userSessionService.clearSession();
+      return true;
     } catch (e) {
-      return Future.value(false);
+      return false;
     }
   }
-  
+
+  @override
+  Future<AuthHiveModel?> getUserById(String authId) async {
+    try {
+      return _hiveService.getUserById(authId);
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Future<AuthHiveModel?> getUserByEmail(String email) async {
     try {
       return _hiveService.getUserByEmail(email);
     } catch (e) {
       return null;
+    }
+  }
+
+  @override
+  Future<bool> updateUser(AuthHiveModel user) async {
+    try {
+      return await _hiveService.updateUser(user);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> deleteUser(String authId) async {
+    try {
+      await _hiveService.deleteUser(authId);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 }
