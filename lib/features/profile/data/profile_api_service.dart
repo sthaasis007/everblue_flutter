@@ -43,10 +43,14 @@ class ProfileApiService {
 
     if (response.statusCode == 200) {
       final data = response.data;
-      if (data is Map && data['photoUrl'] != null) {
-        return data['photoUrl'] as String;
+      if (data is Map && data['data'] is Map && data['data']['photoUrl'] != null) {
+        String photoUrl = data['data']['photoUrl'] as String;
+        // Add cache-busting query parameter to force image refresh
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        photoUrl = '$photoUrl?v=$timestamp';
+        return photoUrl;
       }
-      throw Exception('Unexpected response structure');
+      throw Exception('Unexpected response structure: $data');
     }
     throw Exception('Upload failed with status ${response.statusCode}');
   }

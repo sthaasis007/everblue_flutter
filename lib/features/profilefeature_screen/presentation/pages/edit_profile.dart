@@ -20,6 +20,7 @@ class _EditProfileState extends ConsumerState<EditProfile> {
 
   final List<File> _selectedMedia = [];
   final ImagePicker _imagePicker = ImagePicker();
+  String? _publishedProfileImageUrl;
 
   @override
   void initState() {
@@ -90,15 +91,14 @@ class _EditProfileState extends ConsumerState<EditProfile> {
           .read(authViewModelProvider.notifier)
           .uploadPhoto(File(photo.path));
       
-      // If upload successful, rebuild widget to fetch updated profile image from session
+      // If upload successful, update UI immediately
       if (result != null && mounted) {
-        // print('🎥 Camera upload successful: $result');
-        // Wait a moment to ensure SharedPreferences is updated
-        await Future.delayed(const Duration(milliseconds: 500));
         setState(() {
           _selectedMedia.clear();
+          _publishedProfileImageUrl = result;
         });
-        // Force rebuild the parent to fetch updated profileImageUrl
+        // Also save to session for persistence
+        await Future.delayed(const Duration(milliseconds: 300));
         ref.invalidate(userSessionServiceProvider);
       }
     }
@@ -120,15 +120,14 @@ class _EditProfileState extends ConsumerState<EditProfile> {
             .read(authViewModelProvider.notifier)
             .uploadPhoto(File(image.path));
         
-        // If upload successful, rebuild widget to fetch updated profile image from session
+        // If upload successful, update UI immediately
         if (result != null && mounted) {
-          // print('🖼️ Gallery upload successful: $result');
-          // Wait a moment to ensure SharedPreferences is updated
-          await Future.delayed(const Duration(milliseconds: 500));
           setState(() {
             _selectedMedia.clear();
+            _publishedProfileImageUrl = result;
           });
-          // Force rebuild the parent to fetch updated profileImageUrl
+          // Also save to session for persistence
+          await Future.delayed(const Duration(milliseconds: 300));
           ref.invalidate(userSessionServiceProvider);
         }
       }
@@ -160,8 +159,11 @@ class _EditProfileState extends ConsumerState<EditProfile> {
         userSessionService.getCurrentUserEmail() ?? '';
     final phoneNumber =
         userSessionService.getCurrentUserPhoneNumber() ?? '';
-    final profileImageUrl =
+    final sessionProfileImageUrl =
         userSessionService.getCurrentUserProfilePicture() ?? '';
+    
+    // Use published URL (with timestamp) if available, otherwise use session URL
+    final profileImageUrl = _publishedProfileImageUrl ?? sessionProfileImageUrl;
     
     String? _buildProfileImageUrl(String path) {
       if (path.isEmpty || path == 'default.png') return null;

@@ -33,16 +33,24 @@ class ItemRemoteDatasource implements IItemRemoteDataSource {
         ),
       );
 
-      final photoUrl = _extractPhotoUrl(response.data);
+      var photoUrl = _extractPhotoUrl(response.data);
       if (photoUrl == null) {
         throw Exception('No photo url in response: ${response.data}');
       }
+      
+      // Add cache-busting query parameter to force image refresh
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      photoUrl = '$photoUrl?v=$timestamp';
+      
       return photoUrl;
     } on DioException catch (e) {
       final errorData = e.response?.data;
-      final fallbackUrl = _extractPhotoUrl(errorData);
+      var fallbackUrl = _extractPhotoUrl(errorData);
       if (fallbackUrl != null) {
         print('⚠️ Upload returned error but photoUrl found: $fallbackUrl');
+        // Add cache-busting timestamp
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        fallbackUrl = '$fallbackUrl?v=$timestamp';
         return fallbackUrl;
       }
 
