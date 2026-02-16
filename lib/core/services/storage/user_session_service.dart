@@ -22,6 +22,7 @@ class UserSessionService {
   static const String _keyUserFullName = 'user_full_name';
   static const String _keyUserPhoneNumber = 'user_phone_number';
   static const String _keyUserProfilePicture = 'user_profile_picture';
+  static const String _keyUserRole = 'user_role';
 
   UserSessionService({required SharedPreferences prefs}) : _prefs = prefs;
 
@@ -32,6 +33,7 @@ class UserSessionService {
     required String fullName,
     String? phoneNumber,
     String? profilePicture,
+    String? role,
   }) async {
     await _prefs.setBool(_keyIsLoggedIn, true);
     await _prefs.setString(_keyUserId, userId);
@@ -42,6 +44,9 @@ class UserSessionService {
     }
     if (profilePicture != null) {
       await _prefs.setString(_keyUserProfilePicture, profilePicture);
+    }
+    if (role != null && role.isNotEmpty) {
+      await _prefs.setString(_keyUserRole, role);
     }
   }
 
@@ -77,6 +82,11 @@ class UserSessionService {
     return picture;
   }
 
+  // Get current user role
+  String? getCurrentUserRole() {
+    return _prefs.getString(_keyUserRole);
+  }
+
   // Update user profile picture (after successful upload)
   Future<void> updateUserProfilePicture(String pictureFileName) async {
     await _prefs.setString(_keyUserProfilePicture, pictureFileName);
@@ -92,5 +102,6 @@ class UserSessionService {
     await _prefs.remove(_keyUserFullName);
     await _prefs.remove(_keyUserPhoneNumber);
     await _prefs.remove(_keyUserProfilePicture);
+    await _prefs.remove(_keyUserRole);
   }
 }

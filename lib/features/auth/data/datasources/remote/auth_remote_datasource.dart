@@ -46,6 +46,8 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource{
     if (response.data['success'] == true) {
       final data = response.data['data'] as Map<String, dynamic>;
       final user = AuthApiModel.fromJson(data);
+      final roleValue = data['role'] ?? data['userRole'];
+      final role = roleValue == null ? null : roleValue.toString();
 
       // Save to session - include profilePicture if available
       await _userSessionService.saveUserSession(
@@ -54,6 +56,7 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource{
         fullName: user.fullName,
         phoneNumber: user.phoneNumber,
         profilePicture: user.profilePicture,
+        role: role,
       );
 
       // Save token to TokenService

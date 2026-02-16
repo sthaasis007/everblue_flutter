@@ -2,6 +2,8 @@ import 'package:everblue/core/api/api_endpoint.dart';
 import 'package:everblue/core/services/storage/user_session_service.dart';
 import 'package:everblue/features/auth/presentation/pages/login_screen.dart';
 import 'package:everblue/features/auth/presentation/view_model/auth_view_model.dart';
+import 'package:everblue/features/profilefeature_screen/presentation/pages/add_product_screen.dart';
+import 'package:everblue/features/profilefeature_screen/presentation/pages/edit_product_screen.dart';
 import 'package:everblue/features/profilefeature_screen/presentation/pages/edit_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +32,8 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
     final userName = userSessionService.getCurrentUserFullName() ?? 'User';
     final userEmail = userSessionService.getCurrentUserEmail() ?? '';
     final userPhotoUrl = userSessionService.getCurrentUserProfilePicture() ?? '';
+    final userRole = userSessionService.getCurrentUserRole() ?? '';
+    final isAdmin = userRole.toLowerCase() == 'admin';
 
     String? _buildProfileImageUrl(String path) {
       if (path.isEmpty || path == 'default.png') return null;
@@ -148,6 +152,30 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfile()));
                       },
                     ),
+                    if (isAdmin) ...[
+                      const SizedBox(height: 12),
+                      _MenuItem(
+                        icon: Icons.add_box_outlined,
+                        title: 'Add Product',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AddProductScreen()),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _MenuItem(
+                        icon: Icons.edit_note_outlined,
+                        title: 'Edit Product',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const EditProductScreen()),
+                          );
+                        },
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     _MenuItem(
                       icon: Icons.notifications,
