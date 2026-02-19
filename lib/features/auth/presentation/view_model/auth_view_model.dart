@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:everblue/core/services/storage/user_session_service.dart';
+import 'package:everblue/features/auth/domain/usecases/delete_customer_usecase.dart';
 import 'package:everblue/features/auth/domain/usecases/get_current_usecase.dart';
 import 'package:everblue/features/auth/domain/usecases/login_usecase.dart';
 import 'package:everblue/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:everblue/features/auth/domain/usecases/register_usecase.dart';
+import 'package:everblue/features/auth/domain/usecases/update_user_usecase.dart';
 import 'package:everblue/features/auth/domain/usecases/upload_image_usecase.dart';
 import 'package:everblue/features/auth/presentation/state/auth_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +21,8 @@ class AuthViewModel extends Notifier<AuthState> {
   late final GetCurrentUserUsecase _getCurrentUserUsecase;
   late final LogoutUsecase _logoutUsecase;
   late final UploadPhotoUsecase _uploadPhotoUsecase;
+  late final UpdateUserUsecase _updateUserUsecase;
+  late final DeleteCustomerUsecase _deleteCustomerUsecase;
 
   @override
   AuthState build() {
@@ -27,6 +31,8 @@ class AuthViewModel extends Notifier<AuthState> {
     _getCurrentUserUsecase = ref.read(getCurrentUserUsecaseProvider);
     _logoutUsecase = ref.read(logoutUsecaseProvider);
     _uploadPhotoUsecase = ref.read(uploadPhotoUsecaseProvider);
+    _updateUserUsecase = ref.read(updateUserUsecaseProvider);
+    _deleteCustomerUsecase = ref.read(deleteCustomerUsecaseProvider);
     return const AuthState();
   }
 
@@ -146,6 +152,60 @@ class AuthViewModel extends Notifier<AuthState> {
     }
 
     return uploadedUrl;
+  }
+
+  Future<bool> updateUser({
+    required String userId,
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    String? password,
+  }) async {
+    state = state.copyWith(status: AuthStatus.loading);
+
+    final result = await _updateUserUsecase(
+      UpdateUserParams(
+        userId: userId,
+        fullName: fullName,
+        email: email,
+        phoneNumber: phoneNumber,
+        password: password,
+      ),
+    );
+
+    result.fold(
+      (failure) => state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: failure.message,
+      ),
+      (user) => state = state.copyWith(
+        status: AuthStatus.authenticated,
+        user: user,
+      ),
+    );
+
+    return result.isRight();
+  }
+
+  Future<bool> deleteCustomer(String userId, String password) async {
+    state = state.copyWith(status: AuthStatus.loading);
+
+    final result = await _deleteCustomerUsecase(
+      DeleteCustomerParams(userId: userId, password: password),
+    );
+
+    result.fold(
+      (failure) => state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: failure.message,
+      ),
+      (success) => state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        user: null,
+      ),
+    );
+
+    return result.isRight();
   }
 
   void clearError() {

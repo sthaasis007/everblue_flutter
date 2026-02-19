@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:everblue/core/widgets/image_picker_bottom_sheet.dart';
 import 'package:everblue/features/items/presentation/state/item_state.dart';
 import 'package:everblue/features/items/presentation/view_model/item_view_model.dart';
 import 'package:flutter/material.dart';
@@ -34,15 +35,20 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
-    if (image == null) return;
+    ImagePickerBottomSheet.show(
+      context,
+      onSourceSelected: (ImageSource source) async {
+        final XFile? image = await _imagePicker.pickImage(
+          source: source,
+          imageQuality: 80,
+        );
+        if (image == null) return;
 
-    setState(() {
-      _selectedImage = File(image.path);
-    });
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+      },
+    );
   }
 
   Future<void> _submit() async {
@@ -147,7 +153,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                             OutlinedButton.icon(
                               onPressed: _pickImage,
                               icon: const Icon(Icons.edit_outlined),
-                              label: const Text('Edit Upload'),
+                              label: const Text('Image Upload'),
                             ),
                           ],
                         )

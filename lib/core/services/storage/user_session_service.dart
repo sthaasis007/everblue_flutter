@@ -94,6 +94,21 @@ class UserSessionService {
     print('💾 Saved profile picture to session. Verified: $saved');
   }
 
+  // Update user full name
+  Future<void> updateUserFullName(String fullName) async {
+    await _prefs.setString(_keyUserFullName, fullName);
+  }
+
+  // Update user email
+  Future<void> updateUserEmail(String email) async {
+    await _prefs.setString(_keyUserEmail, email);
+  }
+
+  // Update user phone number
+  Future<void> updateUserPhoneNumber(String phoneNumber) async {
+    await _prefs.setString(_keyUserPhoneNumber, phoneNumber);
+  }
+
   // Clear user session (logout)
   Future<void> clearSession() async {
     await _prefs.remove(_keyIsLoggedIn);

@@ -44,12 +44,12 @@ class MediaPickerBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.camera),
+              leading: Icon(Icons.camera_alt,color: Colors.teal.shade700,),
               title: const Text('Open Camera'),
               onTap: onCameraTap,
             ),
             ListTile(
-              leading: const Icon(Icons.browse_gallery),
+              leading: Icon(Icons.image, color: Colors.teal.shade700,),
               title: const Text('Open Gallery'),
               onTap: onGalleryTap,
             ),

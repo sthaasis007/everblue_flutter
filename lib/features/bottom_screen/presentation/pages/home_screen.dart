@@ -1,4 +1,6 @@
+import 'package:everblue/app/routes/app_routes.dart';
 import 'package:everblue/core/api/api_endpoint.dart';
+import 'package:everblue/features/items/presentation/pages/product_detail_screen.dart';
 import 'package:everblue/features/items/presentation/state/item_state.dart';
 import 'package:everblue/features/items/presentation/view_model/item_view_model.dart';
 import 'package:flutter/material.dart';
@@ -54,25 +56,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),),
             ),
             SizedBox(
-              height: 80,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.grey, width: 2)
-                      ),
+              height: 130,
+              child: items.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text('No items available'),
+                    )
+                  : ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      itemCount: items.length > 8 ? 8 : items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        final imageUrl = _buildItemImageUrl(item.photoUrl);
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: GestureDetector(
+                            onTap: () {
+                              AppRoutes.push(
+                                context,
+                                ProductDetailScreen(item: item),
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.grey.shade300, width: 1),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(40),
+                                    child: imageUrl == null
+                                        ? Container(
+                                            color: Colors.red.shade100,
+                                            child: const Center(
+                                              child: Icon(
+                                                Icons.image_outlined,
+                                                color: Colors.white,
+                                                size: 30,
+                                              ),
+                                            ),
+                                          )
+                                        : Image.network(
+                                            imageUrl,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stack) {
+                                              return Container(
+                                                color: Colors.red.shade100,
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.broken_image_outlined,
+                                                    color: Colors.white,
+                                                    size: 30,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    item.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                }),
             ),
             Align(
               alignment: Alignment.topLeft,
@@ -108,12 +173,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           itemBuilder: (context, index) {
                             final item = items[index];
                             final imageUrl = _buildItemImageUrl(item.photoUrl);
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.red.shade200),
-                              ),
+                            return GestureDetector(
+                              onTap: () {
+                                AppRoutes.push(
+                                  context,
+                                  ProductDetailScreen(item: item),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.red.shade200),
+                                ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -173,6 +245,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 ],
                               ),
+                            ),
                             );
                           },
                         ),

@@ -154,4 +154,71 @@ class AuthRepository implements IAuthRepository{
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
   }
+
+  @override
+  Future<Either<Failure, AuthEntity>> updateUser(
+    String userId,
+    Map<String, dynamic> data,
+  ) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final apiModel = await _authRemoteDataSource.updateUser(userId, data);
+        if (apiModel != null) {
+          final entity = apiModel.toEntity();
+          return Right(entity);
+        }
+        return const Left(ApiFailure(message: "Failed to update user"));
+      } on DioException catch (e) {
+        String errorMessage = 'Update failed';
+        
+        // Handle MongoDB duplicate key error (E11000)
+        final responseData = e.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final message = responseData['message'] as String?;
+          if (message != null && message.contains('E11000')) {
+            if (message.contains('email')) {
+              errorMessage = 'Email already in use';
+            } else if (message.contains('phoneNumber')) {
+              errorMessage = 'Phone number already in use';
+            } else {
+              errorMessage = 'This information is already in use';
+            }
+          } else {
+            errorMessage = message ?? 'Update failed';
+          }
+        }
+        
+        return Left(ApiFailure(
+          message: errorMessage,
+          statusCode: e.response?.statusCode,
+        ));
+      } catch (e) {
+        return Left(ApiFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> deleteCustomer(String userId, String password) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final result = await _authRemoteDataSource.deleteCustomer(userId, password);
+        if (result) {
+          return const Right(true);
+        }
+        return const Left(ApiFailure(message: "Failed to delete account"));
+      } on DioException catch (e) {
+        return Left(ApiFailure(
+          message: e.response?.data?['message'] ?? 'Failed to delete account',
+          statusCode: e.response?.statusCode,
+        ));
+      } catch (e) {
+        return Left(ApiFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+  }
 }

@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'package:everblue/app/routes/app_routes.dart';
 import 'package:everblue/core/api/api_endpoint.dart';
 import 'package:everblue/core/services/storage/user_session_service.dart';
+import 'package:everblue/features/auth/presentation/pages/login_screen.dart';
 import 'package:everblue/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:everblue/features/profilefeature_screen/presentation/widgets/media_picker_buttom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +19,17 @@ class EditProfile extends ConsumerStatefulWidget {
 }
 
 class _EditProfileState extends ConsumerState<EditProfile> {
-
   final List<File> _selectedMedia = [];
   final ImagePicker _imagePicker = ImagePicker();
   String? _publishedProfileImageUrl;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String _initialName = '';
+  String _initialEmail = '';
+  String _initialPhone = '';
+  bool _hasPendingChanges = false;
 
   @override
   void initState() {
@@ -29,6 +38,46 @@ class _EditProfileState extends ConsumerState<EditProfile> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(userSessionServiceProvider);
     });
+
+    final userSessionService = ref.read(userSessionServiceProvider);
+    _syncControllersFromSession(userSessionService);
+
+    _nameController.addListener(_updateDirtyFlag);
+    _emailController.addListener(_updateDirtyFlag);
+    _phoneController.addListener(_updateDirtyFlag);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _syncControllersFromSession(UserSessionService userSessionService) {
+    _initialName = userSessionService.getCurrentUserFullName() ?? '';
+    _initialEmail = userSessionService.getCurrentUserEmail() ?? '';
+    _initialPhone = userSessionService.getCurrentUserPhoneNumber() ?? '';
+
+    _nameController.text = _initialName;
+    _emailController.text = _initialEmail;
+    _phoneController.text = _initialPhone;
+
+    _hasPendingChanges = false;
+  }
+
+  void _updateDirtyFlag() {
+    final nameChanged = _nameController.text.trim() != _initialName.trim();
+    final emailChanged = _emailController.text.trim() != _initialEmail.trim();
+    final phoneChanged = _phoneController.text.trim() != _initialPhone.trim();
+    final hasChanges = nameChanged || emailChanged || phoneChanged;
+    if (hasChanges != _hasPendingChanges && mounted) {
+      setState(() {
+        _hasPendingChanges = hasChanges;
+      });
+    }
   }
 
   void _showPermissionDeniedDialog() {
@@ -149,16 +198,231 @@ class _EditProfileState extends ConsumerState<EditProfile> {
     );
   }
 
+  void _showPasswordDialog() {
+    _passwordController.clear();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Password'),
+        content: TextField(
+          controller: _passwordController,
+          obscureText: true,
+          decoration: const InputDecoration(
+            hintText: 'Enter your password',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _saveProfileUpdates();
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog() {
+    _passwordController.clear();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Are you sure you want to delete your account? This action cannot be undone.',
+              style: TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 16),
+            const Text('Enter your password to confirm:'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                hintText: 'Enter your password',
+                border: OutlineInputBorder(),
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteAccount();
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    final password = _passwordController.text.trim();
+
+    if (password.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your password')),
+        );
+      }
+      return;
+    }
+
+    final userSessionService = ref.read(userSessionServiceProvider);
+    final userId = userSessionService.getCurrentUserId() ?? '';
+    if (userId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to delete account right now')),
+        );
+      }
+      return;
+    }
+
+    final success = await ref.read(authViewModelProvider.notifier).deleteCustomer(userId, password);
+
+    if (success && mounted) {
+      await userSessionService.clearSession();
+      _passwordController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account deleted successfully')),
+      );
+      // Navigate to login screen after deletion
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          AppRoutes.pushAndRemoveUntil(context, const LoginScreen());
+        }
+      });
+    } else if (mounted) {
+      final errorMessage = ref.read(authViewModelProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage ?? 'Failed to delete account'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _saveProfileUpdates() async {
+    final userSessionService = ref.read(userSessionServiceProvider);
+    final userId = userSessionService.getCurrentUserId() ?? '';
+    if (userId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to update profile right now')),
+        );
+      }
+      return;
+    }
+
+    final updatedName = _nameController.text.trim();
+    final updatedEmail = _emailController.text.trim();
+    final updatedPhone = _phoneController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (password.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your password')),
+        );
+      }
+      return;
+    }
+
+    final nameChanged = updatedName != _initialName.trim();
+    final emailChanged = updatedEmail != _initialEmail.trim();
+    final phoneChanged = updatedPhone != _initialPhone.trim();
+
+    if (updatedName.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your name')),
+        );
+      }
+      return;
+    }
+
+    if (updatedEmail.isEmpty || !updatedEmail.contains('@')) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a valid email')),
+        );
+      }
+      return;
+    }
+
+    if (phoneChanged) {
+      final phoneRegex = RegExp(r'^\d{10}$');
+      if (updatedPhone.isEmpty || !phoneRegex.hasMatch(updatedPhone)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Phone number must be exactly 10 digits'),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+    final success = await ref.read(authViewModelProvider.notifier).updateUser(
+          userId: userId,
+          fullName: nameChanged ? updatedName : null,
+          email: emailChanged ? updatedEmail : null,
+          phoneNumber: phoneChanged ? updatedPhone : null,
+          password: password,
+        );
+
+    if (success && mounted) {
+      ref.invalidate(userSessionServiceProvider);
+      setState(() {
+        _initialName = updatedName;
+        _initialEmail = updatedEmail;
+        _initialPhone = updatedPhone;
+        _hasPendingChanges = false;
+        _passwordController.clear();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully')),
+      );
+    } else if (mounted) {
+      final errorMessage = ref.read(authViewModelProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage ?? 'Failed to update profile'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userSessionService = ref.watch(userSessionServiceProvider);
 
-    final userName =
-        userSessionService.getCurrentUserFullName() ?? 'User';
-    final userEmail =
-        userSessionService.getCurrentUserEmail() ?? '';
-    final phoneNumber =
-        userSessionService.getCurrentUserPhoneNumber() ?? '';
+    final userName = _nameController.text.isNotEmpty
+      ? _nameController.text
+      : (userSessionService.getCurrentUserFullName() ?? 'User');
     final sessionProfileImageUrl =
         userSessionService.getCurrentUserProfilePicture() ?? '';
     
@@ -177,7 +441,7 @@ class _EditProfileState extends ConsumerState<EditProfile> {
 
     final profileImageFullUrl = _buildProfileImageUrl(profileImageUrl);
     
-    // print('📝 EditProfile build - Photo URL: $profileImageUrl');
+    // print(' EditProfile build - Photo URL: $profileImageUrl');
 
     return Scaffold(
       appBar: AppBar(
@@ -272,38 +536,51 @@ class _EditProfileState extends ConsumerState<EditProfile> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
-                    _profileField(
+                    _editableProfileField(
                       icon: Icons.person,
                       label: 'Full Name',
-                      value: userName,
-                      onEdit: () {
-                       
-                      },
+                      controller: _nameController,
+                      keyboardType: TextInputType.name,
                     ),
-                    _profileField(
+                    _editableProfileField(
                       icon: Icons.email,
                       label: 'Email',
-                      value: userEmail,
-                      onEdit: () {
-                        
-                      },
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
                     ),
-                    _profileField(
+                    _editableProfileField(
                       icon: Icons.phone,
                       label: 'Phone Number',
-                      value: phoneNumber,
-                      onEdit: () {
-                        
-                      },
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 24),
+              if (_hasPendingChanges)
+                ElevatedButton(
+                  onPressed: _showPasswordDialog,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                  ),
+                  child: const Text(
+                    'Update Profile',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                 
-                },
+                onPressed: _showDeleteConfirmationDialog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
@@ -329,11 +606,11 @@ class _EditProfileState extends ConsumerState<EditProfile> {
     );
   }
 
-  Widget _profileField({
+  Widget _editableProfileField({
     required IconData icon,
     required String label,
-    required String value,
-    required VoidCallback onEdit,
+    required TextEditingController controller,
+    required TextInputType keyboardType,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -363,19 +640,17 @@ class _EditProfileState extends ConsumerState<EditProfile> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
                   ),
                 ),
               ],
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.teal),
-            onPressed: onEdit,
           ),
         ],
       ),

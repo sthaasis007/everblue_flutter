@@ -136,5 +136,61 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource{
     }
   }
   
+  @override
+  Future<AuthApiModel?> updateUser(String userId, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.put(
+        ApiEndpoints.customerUpdate(userId),
+        data: data,
+      );
+
+      if (response.data['success'] == true) {
+        final userData = response.data['data'] as Map<String, dynamic>?;
+        if (userData != null) {
+          final updatedUser = AuthApiModel.fromJson(userData);
+
+          // Update local session with new data
+          await _userSessionService.saveUserSession(
+            userId: updatedUser.id!,
+            email: updatedUser.email,
+            fullName: updatedUser.fullName,
+            phoneNumber: updatedUser.phoneNumber,
+            profilePicture: updatedUser.profilePicture,
+          );
+
+          return updatedUser;
+        }
+      }
+      return null;
+    } on DioException catch (e) {
+      print('❌ Update user error: ${e.message}');
+      rethrow;
+    } catch (e) {
+      print('❌ Update user error: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> deleteCustomer(String userId, String password) async {
+    try {
+      final response = await _apiClient.delete(
+        ApiEndpoints.customerDelete(userId),
+        data: {'password': password},
+      );
+
+      if (response.data['success'] == true) {
+        print('✅ Customer deleted successfully');
+        return true;
+      }
+      return false;
+    } on DioException catch (e) {
+      print('❌ Delete customer error: ${e.message}');
+      rethrow;
+    } catch (e) {
+      print('❌ Delete customer error: $e');
+      rethrow;
+    }
+  }
   
 }

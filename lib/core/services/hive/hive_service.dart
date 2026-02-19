@@ -36,11 +36,6 @@ class HiveService {
     await Hive.openBox<AuthHiveModel>(HiveTableConstants.authTable);
   }
 
-  // box close
-  Future<void> _close() async {
-    await Hive.close();
-  }
-
   // ======================= Auth Queries =========================
 
   Box<AuthHiveModel> get _authBox =>

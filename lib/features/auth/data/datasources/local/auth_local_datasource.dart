@@ -80,7 +80,6 @@ class AuthLocalDatasource implements IAuthLocalDataSource {
     }
   }
 
-  @override
   Future<AuthHiveModel?> getUserById(String authId) async {
     try {
       return _hiveService.getUserById(authId);
@@ -89,7 +88,6 @@ class AuthLocalDatasource implements IAuthLocalDataSource {
     }
   }
 
-  @override
   Future<AuthHiveModel?> getUserByEmail(String email) async {
     try {
       return _hiveService.getUserByEmail(email);
@@ -98,7 +96,6 @@ class AuthLocalDatasource implements IAuthLocalDataSource {
     }
   }
 
-  @override
   Future<bool> updateUser(AuthHiveModel user) async {
     try {
       return await _hiveService.updateUser(user);
@@ -107,7 +104,6 @@ class AuthLocalDatasource implements IAuthLocalDataSource {
     }
   }
 
-  @override
   Future<bool> deleteUser(String authId) async {
     try {
       await _hiveService.deleteUser(authId);

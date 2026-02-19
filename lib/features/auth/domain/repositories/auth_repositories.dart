@@ -10,4 +10,8 @@ abstract interface class IAuthRepository {
   Future<Either<Failure, bool>> logout();
   // image upload
   Future<Either<Failure,String>> uploadImage(File image);
+  // update user profile
+  Future<Either<Failure, AuthEntity>> updateUser(String userId, Map<String, dynamic> data);
+  // delete customer account
+  Future<Either<Failure, bool>> deleteCustomer(String userId, String password);
 }

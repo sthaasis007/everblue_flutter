@@ -10,7 +10,7 @@ import 'package:everblue/features/bottom_screen/presentation/pages/profile_scree
 
 import 'package:everblue/core/services/storage/user_session_service.dart';
 
-/// ✅ Fake user session service for tests
+//Fake user session service for tests
 class FakeUserSessionService implements UserSessionService {
   @override
   String? getCurrentUserFullName() => 'Test User';
@@ -46,14 +46,38 @@ class FakeUserSessionService implements UserSessionService {
   }
   
   @override
-  Future<void> saveUserSession({required String userId, required String email, required String fullName, String? phoneNumber, String? profilePicture}) {
-    // TODO: implement saveUserSession
+  Future<void> updateUserProfilePicture(String pictureFileName) {
+    // TODO: implement updateUserProfilePicture
     throw UnimplementedError();
   }
   
   @override
-  Future<void> updateUserProfilePicture(String pictureFileName) {
-    // TODO: implement updateUserProfilePicture
+  String? getCurrentUserRole() {
+    // TODO: implement getCurrentUserRole
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<void> saveUserSession({required String userId, required String email, required String fullName, String? phoneNumber, String? profilePicture, String? role}) {
+    // TODO: implement saveUserSession
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateUserEmail(String email) {
+    // TODO: implement updateUserEmail
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateUserFullName(String fullName) {
+    // TODO: implement updateUserFullName
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateUserPhoneNumber(String phoneNumber) {
+    // TODO: implement updateUserPhoneNumber
     throw UnimplementedError();
   } // keep empty to avoid NetworkImage
 }

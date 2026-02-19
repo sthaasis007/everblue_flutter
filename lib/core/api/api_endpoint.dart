@@ -7,7 +7,7 @@ class ApiEndpoints {
 
   // Configuration
   static const bool isPhysicalDevice = true;
-  static const String _ipAddress = '192.168.254.20';
+  static const String _ipAddress = '192.168.137.1';
   static const int _port = 3000;
 
   // Base URLs
@@ -33,6 +33,8 @@ class ApiEndpoints {
   static const String customerLogin = '/customers/login';
   static const String customerRegister = '/customers/signup';
   static const String customerProfile = '/customers/upload-image';
+  static String customerUpdate(String id) => '/customers/$id';
+  static String customerDelete(String id) => '/customers/$id';
 
   // ============ Item Endpoints ============
   static const String items = '/items';
