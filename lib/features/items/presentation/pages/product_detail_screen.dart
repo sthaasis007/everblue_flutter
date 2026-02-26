@@ -1,8 +1,11 @@
 import 'package:everblue/core/api/api_endpoint.dart';
+import 'package:everblue/features/cart/presentation/providers/cart_providers.dart';
+import 'package:everblue/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:everblue/features/items/domain/entities/item_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends ConsumerWidget {
   final ItemEntity item;
 
   const ProductDetailScreen({
@@ -21,7 +24,7 @@ class ProductDetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final imageUrl = _buildItemImageUrl(item.photoUrl);
 
     return Scaffold(
@@ -186,12 +189,29 @@ class ProductDetailScreen extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
+                        final cartItems = ref.read(cartItemsProvider);
+                        final alreadyInCart = item.id != null
+                            ? cartItems.any((existing) => existing.id == item.id)
+                            : cartItems.contains(item);
+
+                        if (alreadyInCart) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Already in cart.'),
+                              duration: Duration(milliseconds: 800),
+                            ),
+                          );
+                          return;
+                        }
+
+                        ref.read(cartItemsProvider.notifier).addItem(item);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Added to cart!'),
                             duration: Duration(milliseconds: 800),
                           ),
                         );
+                        Navigator.pop(context);
                       },
                       icon: const Icon(Icons.shopping_cart),
                       label: const Text('Add to Cart'),
@@ -208,12 +228,32 @@ class ProductDetailScreen extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
+                        final checkoutItems = ref.read(checkoutItemsProvider);
+                        final alreadyInCheckout = item.id != null
+                            ? checkoutItems
+                                .any((existing) => existing.id == item.id)
+                            : checkoutItems.contains(item);
+
+                        if (alreadyInCheckout) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Already in checkout.'),
+                              duration: Duration(milliseconds: 800),
+                            ),
+                          );
+                          return;
+                        }
+
+                        ref
+                            .read(checkoutItemsProvider.notifier)
+                            .addItem(item);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Proceeding to checkout...'),
+                            content: Text('Added to checkout!'),
                             duration: Duration(milliseconds: 800),
                           ),
                         );
+                        Navigator.pop(context);
                       },
                       icon: const Icon(Icons.shopping_cart),
                       label: const Text('Checkout'),

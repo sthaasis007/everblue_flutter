@@ -1,35 +1,81 @@
+import 'package:everblue/core/api/api_endpoint.dart';
+import 'package:everblue/features/cart/presentation/providers/cart_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CartScreen extends StatefulWidget {
+class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
-
   @override
-  State<CartScreen> createState() => _CartScreenState();
-}
-
-class _CartScreenState extends State<CartScreen> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(cartItemsProvider);
     return Scaffold(
-      // body: Padding(
-      //   padding: const EdgeInsets.all(10),
-      //   child: Column(
-      //     children: [
-      //       Align(
-      //         alignment: Alignment.topLeft,
-      //         child: Text("Cart",style: TextStyle(
-      //           fontFamily: 'Montserrat Bold',
-      //           fontSize: 30
-      //         ),),
-      //       ),
-      //       Container(
-      //         height: 100,
-      //         color: Colors.red,
-      //       )
-      //     ],
-      //   ),
-      // ),
-      body: Center(child: Text("welcome to cartscreen"))
+      body: items.isEmpty
+          ? const Center(child: Text('Your cart is empty.'))
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                final imageUrl = _buildItemImageUrl(item.photoUrl);
+                return Card(
+                  elevation: 1,
+                  child: ListTile(
+                    leading: _buildItemImage(imageUrl),
+                    title: Text(item.name),
+                    subtitle: Text('Rs. ${item.price.toStringAsFixed(2)}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () {
+                        ref.read(cartItemsProvider.notifier).removeItem(item);
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
+  String? _buildItemImageUrl(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('/public')) {
+      return '${ApiEndpoints.serverUrl}${path.replaceFirst('/public', '')}';
+    }
+    if (path.startsWith('/')) return '${ApiEndpoints.serverUrl}$path';
+    return '${ApiEndpoints.serverUrl}/public/item_photo/$path';
+  }
+
+  Widget _buildItemImage(String? imageUrl) {
+    if (imageUrl == null) {
+      return Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.red.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(Icons.image_outlined, color: Colors.white),
       );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        imageUrl,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stack) {
+          return Container(
+            width: 56,
+            height: 56,
+            color: Colors.red.shade100,
+            child: const Icon(Icons.broken_image_outlined, color: Colors.white),
+          );
+        },
+      ),
+    );
   }
 }
