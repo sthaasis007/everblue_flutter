@@ -1,4 +1,5 @@
 import 'package:everblue/core/api/api_endpoint.dart';
+import 'package:everblue/core/services/security/biometric_auth_service.dart';
 import 'package:everblue/core/services/storage/user_session_service.dart';
 import 'package:everblue/features/auth/presentation/pages/login_screen.dart';
 import 'package:everblue/features/auth/presentation/view_model/auth_view_model.dart';
@@ -21,11 +22,74 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _loadBiometricPreference();
     // Refresh session data when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // print('👤 ProfileScreen: Refreshing session data...');
       ref.invalidate(userSessionServiceProvider);
     });
+  }
+
+  Future<void> _loadBiometricPreference() async {
+    final biometricService = ref.read(biometricAuthServiceProvider);
+    final enabled = await biometricService.isBiometricEnabled();
+
+    if (!mounted) return;
+    setState(() {
+      _useFingerSensor = enabled;
+    });
+  }
+
+  Future<void> _onFingerToggleChanged(bool value) async {
+    final biometricService = ref.read(biometricAuthServiceProvider);
+
+    if (!value) {
+      await biometricService.setBiometricEnabled(false);
+      if (!mounted) return;
+      setState(() {
+        _useFingerSensor = false;
+      });
+      return;
+    }
+
+    final canUseBiometric = await biometricService.canUseBiometrics();
+    if (!canUseBiometric) {
+      final reason = await biometricService.getBiometricUnavailableReason();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(reason)),
+      );
+      setState(() {
+        _useFingerSensor = false;
+      });
+      await biometricService.setBiometricEnabled(false);
+      return;
+    }
+
+    final isAuthenticated = await biometricService.authenticate(
+      reason: 'Validate your fingerprint to enable fingerprint login',
+    );
+
+    if (!mounted) return;
+
+    if (!isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Fingerprint validation failed.')),
+      );
+      setState(() {
+        _useFingerSensor = false;
+      });
+      await biometricService.setBiometricEnabled(false);
+      return;
+    }
+
+    await biometricService.setBiometricEnabled(true);
+    setState(() {
+      _useFingerSensor = true;
+    });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Fingerprint login enabled.')));
   }
 
   @override
@@ -212,11 +276,7 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                       icon: Icons.fingerprint,
                       title: 'Use finger sensor',
                       value: _useFingerSensor,
-                      onChanged: (value) {
-                        setState(() {
-                          _useFingerSensor = value;
-                        });
-                      },
+                      onChanged: _onFingerToggleChanged,
                     ),
                     const SizedBox(height: 50),
                     _MenuItem(

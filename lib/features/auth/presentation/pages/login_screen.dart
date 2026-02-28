@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/services/security/biometric_auth_service.dart';
 import '../../../../core/widgets/mybutton.dart';
 import '../../../../core/widgets/mytextfeild.dart';
 import '../../../dashboard/presentation/pages/dashboard_screen.dart';
@@ -20,6 +20,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController mail = TextEditingController();
   final TextEditingController pass = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isBiometricLoginEnabled = false;
+  bool _hasPromptedBiometric = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBiometricState();
+  }
+
+  Future<void> _loadBiometricState() async {
+    final biometricService = ref.read(biometricAuthServiceProvider);
+
+    final isEnabled = await biometricService.isBiometricEnabled();
+    final canUseBiometric = await biometricService.canUseBiometrics();
+    final hasCredentials = await biometricService.hasSavedCredentials();
+
+    if (!mounted) return;
+
+    final canLoginWithBiometric =
+        isEnabled && canUseBiometric && hasCredentials;
+
+    setState(() {
+      _isBiometricLoginEnabled = canLoginWithBiometric;
+    });
+
+    if (canLoginWithBiometric && !_hasPromptedBiometric) {
+      _hasPromptedBiometric = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _handleBiometricLogin();
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -51,18 +85,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(authViewModelProvider.notifier).login(
-        email: mail.text,
-        password: pass.text,
-      );
+      await ref
+          .read(authViewModelProvider.notifier)
+          .login(email: mail.text, password: pass.text);
 
       if (!mounted) return;
 
       final authState = ref.read(authViewModelProvider);
       if (authState.status == AuthStatus.authenticated) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Login successful!')));
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const DashboardScreen()),
@@ -72,6 +105,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           SnackBar(content: Text(authState.errorMessage ?? 'Login failed')),
         );
       }
+    }
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    final biometricService = ref.read(biometricAuthServiceProvider);
+
+    final isAuthenticated = await biometricService.authenticate(
+      reason: 'Validate your fingerprint to login',
+    );
+
+    if (!isAuthenticated || !mounted) {
+      return;
+    }
+
+    final credentials = await biometricService.getSavedCredentials();
+    if (credentials == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No saved credentials for fingerprint login.'),
+        ),
+      );
+      return;
+    }
+
+    await ref
+        .read(authViewModelProvider.notifier)
+        .login(email: credentials.email, password: credentials.password);
+
+    if (!mounted) return;
+
+    final authState = ref.read(authViewModelProvider);
+    if (authState.status == AuthStatus.authenticated) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+      );
+    } else if (authState.status == AuthStatus.error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authState.errorMessage ?? 'Fingerprint login failed'),
+        ),
+      );
     }
   }
 
@@ -102,7 +181,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: const Center(
                     child: Text(
                       "Log in",
-                      style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 50,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -131,6 +213,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         obscureText: true,
                       ),
                       const SizedBox(height: 15),
+                      if (_isBiometricLoginEnabled) ...[
+                        MyButton(
+                          onPressed: isLoading ? null : _handleBiometricLogin,
+                          text: isLoading
+                              ? "Logging in..."
+                              : "Login with Fingerprint",
+                        ),
+                        const SizedBox(height: 15),
+                      ],
                       MyButton(
                         onPressed: isLoading ? null : _handleLogin,
                         text: isLoading ? "Logging in..." : "Log In",

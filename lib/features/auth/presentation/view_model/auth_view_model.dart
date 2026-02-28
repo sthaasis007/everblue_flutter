@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:everblue/core/services/security/biometric_auth_service.dart';
 import 'package:everblue/core/services/storage/user_session_service.dart';
 import 'package:everblue/features/auth/domain/usecases/delete_customer_usecase.dart';
 import 'package:everblue/features/auth/domain/usecases/get_current_usecase.dart';
@@ -23,6 +24,7 @@ class AuthViewModel extends Notifier<AuthState> {
   late final UploadPhotoUsecase _uploadPhotoUsecase;
   late final UpdateUserUsecase _updateUserUsecase;
   late final DeleteCustomerUsecase _deleteCustomerUsecase;
+  late final BiometricAuthService _biometricAuthService;
 
   @override
   AuthState build() {
@@ -33,6 +35,7 @@ class AuthViewModel extends Notifier<AuthState> {
     _uploadPhotoUsecase = ref.read(uploadPhotoUsecaseProvider);
     _updateUserUsecase = ref.read(updateUserUsecaseProvider);
     _deleteCustomerUsecase = ref.read(deleteCustomerUsecaseProvider);
+    _biometricAuthService = ref.read(biometricAuthServiceProvider);
     return const AuthState();
   }
 
@@ -41,7 +44,6 @@ class AuthViewModel extends Notifier<AuthState> {
     required String email,
     required String phoneNumber,
     required String password,
-    
   }) async {
     state = state.copyWith(status: AuthStatus.loading);
 
@@ -51,7 +53,6 @@ class AuthViewModel extends Notifier<AuthState> {
         email: email,
         phoneNumber: phoneNumber,
         password: password,
-        
       ),
     );
 
@@ -70,6 +71,15 @@ class AuthViewModel extends Notifier<AuthState> {
     final result = await _loginUsecase(
       LoginParams(email: email, password: password),
     );
+
+    if (result.isRight()) {
+      try {
+        await _biometricAuthService.saveLoginCredentials(
+          email: email,
+          password: password,
+        );
+      } catch (_) {}
+    }
 
     result.fold(
       (failure) => state = state.copyWith(
@@ -178,10 +188,8 @@ class AuthViewModel extends Notifier<AuthState> {
         status: AuthStatus.error,
         errorMessage: failure.message,
       ),
-      (user) => state = state.copyWith(
-        status: AuthStatus.authenticated,
-        user: user,
-      ),
+      (user) =>
+          state = state.copyWith(status: AuthStatus.authenticated, user: user),
     );
 
     return result.isRight();

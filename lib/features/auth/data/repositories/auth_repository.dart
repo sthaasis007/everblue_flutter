@@ -58,35 +58,35 @@ class AuthRepository implements IAuthRepository{
     String email,
     String password,
   ) async {
-    if (await _networkInfo.isConnected) {
-      try {
-        final apiModel = await _authRemoteDataSource.login(email, password);
-        if (apiModel != null) {
-          final entity = apiModel.toEntity();
-          return Right(entity);
-        }
-        return const Left(ApiFailure(message: "Invalid email or password"));
-      } on DioException catch (e) {
-        return Left(ApiFailure(
-          message: e.response?.data?['message'] ?? 'Login failed',
-          statusCode: e.response?.statusCode,
-          ));
-      } catch (e) {
-        return Left(ApiFailure(message: e.toString()));
+    try {
+      final apiModel = await _authRemoteDataSource.login(email, password);
+      if (apiModel != null) {
+        final entity = apiModel.toEntity();
+        return Right(entity);
       }
-    } else {
-      try {
-        final model = await _authDataSource.login(email, password);
-        if (model != null) {
-          final entity = model.toEntity();
-          return Right(entity);
+      return const Left(ApiFailure(message: "Invalid email or password"));
+    } on DioException catch (e) {
+      if (_isConnectivityIssue(e)) {
+        try {
+          final model = await _authDataSource.login(email, password);
+          if (model != null) {
+            final entity = model.toEntity();
+            return Right(entity);
+          }
+          return const Left(
+            LocalDatabaseFailure(message: "Invalid email or password"),
+          );
+        } catch (localError) {
+          return Left(LocalDatabaseFailure(message: localError.toString()));
         }
-        return const Left(
-          LocalDatabaseFailure(message: "Invalid email or password"),
-        );
-      } catch (e) {
-        return Left(LocalDatabaseFailure(message: e.toString()));
       }
+
+      return Left(ApiFailure(
+        message: e.response?.data?['message'] ?? 'Login failed',
+        statusCode: e.response?.statusCode,
+      ));
+    } catch (e) {
+      return Left(ApiFailure(message: e.toString()));
     }
   }
 
@@ -105,40 +105,46 @@ class AuthRepository implements IAuthRepository{
 
   @override
   Future<Either<Failure, bool>> register(AuthEntity user) async {
-    if (await _networkInfo.isConnected) {
-      try {
-        final apiModel = AuthApiModel.fromEntity(user);
-        await _authRemoteDataSource.register(apiModel);
-        return const Right(true);
-      } on DioException catch (e) {
-        return Left(ApiFailure(
-          message: e.response?.data?['message'] ?? 'Registration failed',
-          statusCode: e.response?.statusCode,
-          ));
-      } catch (e) {
-        return Left(ApiFailure(message: e.toString()));
-      }
-    }else {
-      try {
-        // Check if email already exists
-        final existingUser = await _authDataSource.getUserByEmail(user.email);
-        if (existingUser != null) {
-          return const Left(
-            LocalDatabaseFailure(message: "Email already registered"),
+    try {
+      final apiModel = AuthApiModel.fromEntity(user);
+      await _authRemoteDataSource.register(apiModel);
+      return const Right(true);
+    } on DioException catch (e) {
+      if (_isConnectivityIssue(e)) {
+        try {
+          final existingUser = await _authDataSource.getUserByEmail(user.email);
+          if (existingUser != null) {
+            return const Left(
+              LocalDatabaseFailure(message: "Email already registered"),
+            );
+          }
+          final authModel = AuthHiveModel(
+            fullName: user.fullName,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            password: user.password,
           );
+          await _authDataSource.register(authModel);
+          return const Right(true);
+        } catch (localError) {
+          return Left(LocalDatabaseFailure(message: localError.toString()));
         }
-        final authModel = AuthHiveModel(
-          fullName: user.fullName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          password: user.password,
-        );
-        await _authDataSource.register(authModel);
-        return const Right(true);
-      } catch (e) {
-        return Left(LocalDatabaseFailure(message: e.toString()));
       }
+
+      return Left(ApiFailure(
+        message: e.response?.data?['message'] ?? 'Registration failed',
+        statusCode: e.response?.statusCode,
+      ));
+    } catch (e) {
+      return Left(ApiFailure(message: e.toString()));
     }
+  }
+
+  bool _isConnectivityIssue(DioException e) {
+    return e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.connectionError;
   }
 
   @override
