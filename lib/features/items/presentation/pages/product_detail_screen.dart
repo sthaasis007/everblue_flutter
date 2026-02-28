@@ -1,6 +1,5 @@
 import 'package:everblue/core/api/api_endpoint.dart';
 import 'package:everblue/features/cart/presentation/providers/cart_providers.dart';
-import 'package:everblue/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:everblue/features/items/domain/entities/item_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
