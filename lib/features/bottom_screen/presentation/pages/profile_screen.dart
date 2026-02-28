@@ -16,6 +16,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
+  bool _useFingerSensor = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +33,8 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
     final userSessionService = ref.watch(userSessionServiceProvider);
     final userName = userSessionService.getCurrentUserFullName() ?? 'User';
     final userEmail = userSessionService.getCurrentUserEmail() ?? '';
-    final userPhotoUrl = userSessionService.getCurrentUserProfilePicture() ?? '';
+    final userPhotoUrl =
+        userSessionService.getCurrentUserProfilePicture() ?? '';
     final userRole = userSessionService.getCurrentUserRole() ?? '';
     final isAdmin = userRole.toLowerCase() == 'admin';
 
@@ -41,12 +44,13 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
       if (path.startsWith('/public')) {
         return '${ApiEndpoints.serverUrl}${path.replaceFirst('/public', '')}';
       }
-      if (path.startsWith('/profile_picture')) return '${ApiEndpoints.serverUrl}$path';
+      if (path.startsWith('/profile_picture'))
+        return '${ApiEndpoints.serverUrl}$path';
       return '${ApiEndpoints.serverUrl}/profile_picture/$path';
     }
 
     final displayPhotoUrl = _buildProfileImageUrl(userPhotoUrl);
-    
+
     // print('🔍 ProfileScreen build - Photo URL: $userPhotoUrl');
 
     return Scaffold(
@@ -82,10 +86,7 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 4,
-                        ),
+                        border: Border.all(color: Colors.white, width: 4),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black26,
@@ -98,16 +99,16 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                           ? CircleAvatar(
                               radius: 60,
                               backgroundColor: Colors.white,
-                              backgroundImage: NetworkImage(
-                                displayPhotoUrl,
-                              ),
+                              backgroundImage: NetworkImage(displayPhotoUrl),
                               child: Container(),
                             )
                           : CircleAvatar(
                               radius: 60,
                               backgroundColor: Colors.white,
                               child: Text(
-                                userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                userName.isNotEmpty
+                                    ? userName[0].toUpperCase()
+                                    : 'U',
                                 style: TextStyle(
                                   fontSize: 48,
                                   fontWeight: FontWeight.bold,
@@ -130,10 +131,7 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 8),
                     Text(
                       userEmail,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                   ],
                 ),
@@ -149,7 +147,12 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                       icon: Icons.person_outline_rounded,
                       title: 'Edit Profile',
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfile()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const EditProfile(),
+                          ),
+                        );
                       },
                     ),
                     if (isAdmin) ...[
@@ -160,7 +163,9 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const AddProductScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AddProductScreen(),
+                            ),
                           );
                         },
                       ),
@@ -171,7 +176,9 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const EditProductScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const EditProductScreen(),
+                            ),
                           );
                         },
                       ),
@@ -200,6 +207,17 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
                       title: 'About',
                       onTap: () {},
                     ),
+                    const SizedBox(height: 12),
+                    _ToggleMenuItem(
+                      icon: Icons.fingerprint,
+                      title: 'Use finger sensor',
+                      value: _useFingerSensor,
+                      onChanged: (value) {
+                        setState(() {
+                          _useFingerSensor = value;
+                        });
+                      },
+                    ),
                     const SizedBox(height: 50),
                     _MenuItem(
                       icon: Icons.logout_rounded,
@@ -215,32 +233,22 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
               ),
             ],
           ),
-        ) )
+        ),
+      ),
     );
   }
 
-  
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text(
-          'Logout',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
         content: Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () async {
@@ -248,15 +256,15 @@ class _ProfileSccreenState extends ConsumerState<ProfileScreen> {
               // Clear user session
               await ref.read(authViewModelProvider.notifier).logout();
               if (context.mounted) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
               }
             },
             child: Text(
               'Logout',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -307,11 +315,7 @@ class _MenuItem extends StatelessWidget {
                     color: (iconColor ?? Colors.lime).withAlpha(26),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    icon,
-                    color: iconColor ?? Colors.black,
-                    size: 24,
-                  ),
+                  child: Icon(icon, color: iconColor ?? Colors.black, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -332,6 +336,58 @@ class _MenuItem extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ToggleMenuItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _ToggleMenuItem({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.lime.withAlpha(26),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.black, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.lightBlue,
+                ),
+              ),
+            ),
+            Switch(value: value, onChanged: onChanged),
+          ],
         ),
       ),
     );
