@@ -21,7 +21,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController pass = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isBiometricLoginEnabled = false;
-  bool _hasPromptedBiometric = false;
 
   @override
   void initState() {
@@ -44,15 +43,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() {
       _isBiometricLoginEnabled = canLoginWithBiometric;
     });
-
-    if (canLoginWithBiometric && !_hasPromptedBiometric) {
-      _hasPromptedBiometric = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _handleBiometricLogin();
-        }
-      });
-    }
   }
 
   @override
