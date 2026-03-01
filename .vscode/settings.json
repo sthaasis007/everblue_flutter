@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^flutter test test/features/auth/presentation/pages/signup_screen_test\\.dart --reporter compact 2>&1 \\| findstr \"Error\\|Exception\\|failed\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
