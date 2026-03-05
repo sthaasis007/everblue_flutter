@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CartScreen extends ConsumerWidget {
-  const CartScreen({super.key});
+  const CartScreen({super.key, this.onGoToCheckout});
+
+  final VoidCallback? onGoToCheckout;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(cartItemsProvider);
@@ -33,6 +36,30 @@ class CartScreen extends ConsumerWidget {
                   ),
                 );
               },
+            ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: items.isEmpty
+          ? null
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final checkoutNotifier = ref.read(
+                      checkoutItemsProvider.notifier,
+                    );
+                    checkoutNotifier.clear();
+                    for (final item in items) {
+                      checkoutNotifier.addItem(item);
+                    }
+
+                    onGoToCheckout?.call();
+                  },
+                  icon: const Icon(Icons.payment),
+                  label: const Text('Go to Checkout'),
+                ),
+              ),
             ),
     );
   }
